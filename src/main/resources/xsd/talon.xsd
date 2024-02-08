@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://pluser.com/medreg"
+           xmlns:ns="http://pluser.com/medreg"
+           elementFormDefault="qualified">
+
+    <!-- Запрос генерации талонов -->
+    <xs:element name="talonGenRequest">
+        <!-- Состоит из двух элементов: основные правила и правила специализаций -->
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="general">
+                    <!--
+                    Основные правила это описание основного принципа создания талонов
+                    - правила создания по датам,
+                    - флаг удаления данных (для демонстрационного проекта удобно),
+                    - указание специализаций создаваемых талонов
+                     -->
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="datesRule" type="ns:datesRuleT"/>
+                            <xs:element name="deleteInPeriod" type="xs:boolean"/>
+                            <xs:element name="specializationRule" type="ns:specializationRule" minOccurs="0"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element name="specializationDurations" minOccurs="0">
+                    <!--
+                    Правила специализаций могут содержать доп параметры. В данном случае
+                    это переопределение продолжительности талонов в зависимости от специализации
+                    -->
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element maxOccurs="unbounded" name="durationPair">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="specializationUuid" type="xs:string"/>
+                                        <xs:element name="period" type="xs:duration"/>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="datesRuleT">
+        <!--
+        Тип может состоять либо из даты начала и даты конца генерации
+        либо из даты начала и периода.
+        Приложение использует период для получения даты конца генерации
+        и его последующего использования в цикле for
+        -->
+        <xs:sequence>
+            <xs:element name="startDate" type="xs:dateTime"/>
+            <xs:choice>
+                <xs:element name="stopDate" type="xs:dateTime"/>
+                <xs:element name="period" type="xs:duration"/>
+            </xs:choice>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="specializationRule">
+        <!--
+        Список создаваемых специализаций
+        -->
+        <xs:sequence>
+            <xs:element name="specializationUuid" type="xs:string" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="talonGenResponse">
+        <!--
+        Ответ на запрос генерации. Помимо статса принципе можно передавать созданные тикеты, можно ничего не передавать
+        -->
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="status" type="xs:string"/>
+                <xs:sequence>
+                    <xs:element name="talon" type="ns:talon" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Далее описаны основные типы приложения. Они впринципе аналогичны entity, но
+    по сути своей являются dto для контроллеров -->
+
+    <xs:complexType name="talon">
+        <!--
+        Тип талона
+        -->
+        <xs:sequence>
+            <xs:element name="uuid" type="xs:string"/>
+            <xs:element name="patient" type="ns:patient"/>
+            <xs:element name="doctor" type="ns:doctor"/>
+            <xs:element name="specialization" type="ns:specialization"/>
+            <xs:element name="startDateTime" type="xs:dateTime"/>
+            <xs:element name="stopDateTime" type="xs:dateTime"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="person">
+        <!--
+        Тип персоны
+        -->
+        <xs:sequence>
+            <xs:element name="uuid" type="xs:string"/>
+            <xs:element name="lastName" type="xs:string"/>
+            <xs:element name="firstName" type="xs:string"/>
+            <xs:element name="patronymic" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="patient">
+        <!--
+        Тип пациента
+        Расширяет персону, но так то можно и через type="person"
+        -->
+        <xs:complexContent>
+            <xs:extension base="ns:person"/>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="doctor">
+        <!--
+        Тип доктора
+        Расширяет персону, добавляя специализации
+        -->
+        <xs:complexContent>
+            <xs:extension base="ns:person">
+                <xs:sequence>
+                    <xs:element name="specialization" type="ns:specialization" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="specialization">
+        <!--
+        Тип специализации (талона или доктора)
+        -->
+        <xs:sequence>
+            <xs:element name="uuid" type="xs:string"/>
+            <xs:element name="name" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

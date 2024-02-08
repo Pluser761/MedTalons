@@ -1,0 +1,14 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns="http://pluser.com/medreg">
+    <soapenv:Header/>
+    <soapenv:Body>
+        <ns:talonGenRequest>
+            <ns:general>
+                <ns:datesRule>
+                    <ns:startDate>2024-03-02T08:45:00</ns:startDate>
+                    <ns:period>PT3H</ns:period>
+                </ns:datesRule>
+                <ns:deleteInPeriod>true</ns:deleteInPeriod>
+            </ns:general>
+        </ns:talonGenRequest>
+    </soapenv:Body>
+</soapenv:Envelope>

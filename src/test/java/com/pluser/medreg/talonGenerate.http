@@ -1,0 +1,8 @@
+# curl --header "content-type: text/xml" -d @request.xml http://localhost:80/ws
+POST http://localhost/ws
+Content-Type: text/xml
+
+< request.xml
+
+###
+

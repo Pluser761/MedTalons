@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    url: 'jdbc:postgresql://${DATABASE_URL}:${DATABASE_PORT}/${DATABASE_NAME}'
+    username: '${DATABASE_USERNAME}'
+    password: "${DATABASE_PASSWORD}"
+    driver-class-name: org.postgresql.Driver
+    dbcp2:
+      default-schema: "public"
+
+  jta:
+    enabled: false
+
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+logging:
+  level:
+    web: trace
+    org:
+      hibernate:
+        SQL: trace
+        type:
+          descriptor:
+            sql:
+              BasicBinder: trace
+
+server:
+  port: ${SERVER_PORT}
